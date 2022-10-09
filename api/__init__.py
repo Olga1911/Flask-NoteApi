@@ -25,6 +25,8 @@ auth = MultiAuth(basic_auth, token_auth)
 docs = FlaskApiSpec(app)
 # swagger = Swagger(app)
 
+with app.app_context():
+   from commands import *
 
 @basic_auth.verify_password
 def verify_password(username, password):
