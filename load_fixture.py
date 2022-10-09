@@ -1,33 +1,34 @@
-from api import db
-import json
-from api.schemas.user import UserRequestSchema
 import click
+import json
 from config import Config
+from api import db
+from api.schemas.user import UserRequestSchema
 
 from api.models.note import NoteModel
 from api.models.user import UserModel
+from api.models.tag import TagModel
 
 
 @click.command
-@click.argument('file_name')
-#@click.option('--count', default=1, help='Number of messages')
-def load_data(file_name):
-    with open(Config.PATH_TO_FIXTURES / file_name, "r", encoding="UTF-8") as f:
+# @click.argument('file_name') # python load_fixtures.py 'notes.json'
+@click.option('--fixture', help='fixture file name') # python load_fixtures.py --fixture 'notes.json'
+def load_data(fixture):
+    models = {
+        "UserModel": UserModel,
+        "NoteModel": NoteModel,
+        "TagModel": TagModel
+    }
+    with open(Config.PATH_TO_FIXTURES / fixture, "r", encoding="UTF-8") as f:
         file_data = json.load(f)
         model_name = file_data["model"]
-        if model_name == "UserModel":
-            model = UserModel
-        elif model_name == "NoteModel":
-            model = NoteModel
-
+        model = models[model_name]
         for obj_data in file_data["data"]:
             obj = model(**obj_data)
             db.session.add(obj)
         db.session.commit()
-    print(f"{len(file_data['data'])} notes created")
-    #print(f"{len(file_data['data'])} users created")
+    print(f"{len(file_data['data'])} {model_name} created")
 
-#path_to_fixture = "fixtures/users.json"
+
 # path_to_fixture = "fixtures/notes.json"
 # load_data(path_to_fixture)
 
